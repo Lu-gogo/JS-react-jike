@@ -7,7 +7,9 @@ const userStore = createSlice({
   name: "user",
   //数据状态
   initialState: {
-    token: getToken('token_key') || ''
+    token: getToken('token_key') || '',
+    userInfo: {}
+
   },
   //同步修改方法
   reducers: {
@@ -15,13 +17,16 @@ const userStore = createSlice({
       state.token = action.payload
       //localStorage存储token
       _setToken(action.payload)
+    },
+    setUserInfo(state, action) {
+      state.userInfo = action.payload
     }
   }
 })
 
 //解构出actionCreater
 
-const { setToken } = userStore.actions
+const { setToken, setUserInfo } = userStore.actions
 
 //获取reducer函数
 
@@ -38,6 +43,14 @@ const fetchLogin = (loginForm) => {
   }
 }
 
-export { fetchLogin, setToken }
+//异步获取用户信息
+const fetchUserInfo = () => {
+  return async (dispatch) => {
+    const res = await request.get('/user/profile')
+    dispatch(setUserInfo(res.data))
+  }
+}
+
+export { fetchLogin, fetchUserInfo, setToken }
 
 export default userReducer
