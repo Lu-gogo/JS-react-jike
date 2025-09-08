@@ -4,6 +4,8 @@ import axios from "axios"
 //2.超时时间
 //3.请求拦截器/响应拦截器
 
+import { getToken } from './token'
+
 const request = axios.create({
   baseURL: 'http://geek.itheima.net/v1_0',
   timeout: 5000
@@ -12,6 +14,13 @@ const request = axios.create({
 // 添加请求拦截器
 // 在发送请求之前做些什么 自定义配置
 request.interceptors.request.use((config) => {
+  //操作config 注入token对象
+  //1.获取token
+  //2.按照后端格式做token拼接
+  const token = getToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
   return config
 }, (error) => {
   return Promise.reject(error)
