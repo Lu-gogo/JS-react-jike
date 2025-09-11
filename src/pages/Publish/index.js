@@ -13,7 +13,67 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import './index.scss'
 
+// import ReactQuill from 'react-quill'
+// import 'react-quill/dist/quill.snow.css'
+import React, { useEffect, useRef } from 'react';
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css';
+
+
 const { Option } = Select
+
+// const quill = new Quill('#editor', {
+//   modules: { toolbar: true },
+//   theme: 'snow'
+// })
+
+const QuillEditor = ({ value, onChange }) => {
+  const editorRef = useRef(null);
+  const quillRef = useRef(null);
+
+  useEffect(() => {
+    if (editorRef.current && !quillRef.current) {
+      quillRef.current = new Quill(editorRef.current, {
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ script: 'sub' }, { script: 'super' }],
+            [{ indent: '-1' }, { indent: '+1' }],
+            [{ direction: 'rtl' }],
+            [{ color: [] }, { background: [] }],
+            [{ font: [] }],
+            [{ align: [] }],
+            ['link', 'image', 'video'],
+            ['clean']
+          ]
+        },
+        theme: 'snow'
+      });
+
+      // 设置初始值
+      if (value) {
+        quillRef.current.root.innerHTML = value;
+      }
+
+      // 添加内容变化监听
+      quillRef.current.on('text-change', () => {
+        const content = quillRef.current.root.innerHTML;
+        onChange(content);
+      });
+    }
+
+    return () => {
+      if (quillRef.current) {
+        quillRef.current.off('text-change');
+      }
+    };
+  }, []);
+
+  return <div ref={editorRef} style={{ height: '400px' }} />;
+};
+
 
 const Publish = () => {
   return (
@@ -54,6 +114,14 @@ const Publish = () => {
             rules={[{ required: true, message: '请输入文章内容' }]}
           >
             {/* 富文本组件 */}
+            <QuillEditor />
+            {/* <ReactQuill
+              className="publish-quill"
+              theme="snow"
+              placeholder="请输入文章内容"
+            /> */}
+            {/* <QuillEditor /> */}
+
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 4 }}>
