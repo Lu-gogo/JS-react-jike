@@ -17,7 +17,8 @@ import { useState } from 'react'
 import { createArticleAPI, getChannelAPI } from '@/apis/articles'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
+import { useChannel } from '@/hooks/useChannel'
 // import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 
@@ -27,16 +28,7 @@ const { Option } = Select
 
 const Publish = () => {
   //获取频道列表
-  const [channelList, setChannelList] = useState([])
-  useEffect(() => {
-    //1.封装函数 在函数体内调用接口
-    const getChannelList = async () => {
-      const res = await getChannelAPI()
-      setChannelList(res.data.channels)
-    }
-    //2.调用函数
-    getChannelList()
-  }, [])
+  const { channelList } = useChannel()
 
   //提交表单
   const onFinish = (formValue) => {
