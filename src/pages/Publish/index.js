@@ -23,58 +23,6 @@ import 'quill/dist/quill.snow.css';
 
 const { Option } = Select
 
-// const quill = new Quill('#editor', {
-//   modules: { toolbar: true },
-//   theme: 'snow'
-// })
-
-// const QuillEditor = ({ value, onChange }) => {
-//   const editorRef = useRef(null);
-//   const quillRef = useRef(null);
-
-//   useEffect(() => {
-//     if (editorRef.current && !quillRef.current) {
-//       quillRef.current = new Quill(editorRef.current, {
-//         modules: {
-//           toolbar: [
-//             [{ header: [1, 2, 3, 4, 5, 6, false] }],
-//             ['bold', 'italic', 'underline', 'strike'],
-//             [{ list: 'ordered' }, { list: 'bullet' }],
-//             [{ script: 'sub' }, { script: 'super' }],
-//             [{ indent: '-1' }, { indent: '+1' }],
-//             [{ direction: 'rtl' }],
-//             [{ color: [] }, { background: [] }],
-//             [{ font: [] }],
-//             [{ align: [] }],
-//             ['link', 'image', 'video'],
-//             ['clean']
-//           ]
-//         },
-//         theme: 'snow'
-//       });
-
-//       // 设置初始值
-//       if (value) {
-//         quillRef.current.root.innerHTML = value;
-//       }
-
-//       // 添加内容变化监听
-//       quillRef.current.on('text-change', () => {
-//         const content = quillRef.current.root.innerHTML;
-//         onChange(content);
-//       });
-//     }
-
-//     return () => {
-//       if (quillRef.current) {
-//         quillRef.current.off('text-change');
-//       }
-//     };
-//   }, []);
-
-// return <div ref={editorRef} style={{ height: '400px' }} />;
-// };
-
 
 const Publish = () => {
   //获取频道列表
@@ -105,6 +53,12 @@ const Publish = () => {
     }
     //2.调用接口提交
     createArticleAPI(reqData)
+  }
+  //上传回调
+  const [imgeList, setimageList] = useState([])
+  const onChange = (value) => {
+    // console.log('图片上传', value)
+    setimageList(value.fileList)
   }
   return (
     <div className="publish">
@@ -139,6 +93,30 @@ const Publish = () => {
               {/* value属性会被自动收集起来作为接口的提交字段 */}
               {channelList.map(item => <Option key={item.id} value={item.id}>{item.name}</Option>)}
             </Select>
+          </Form.Item>
+          <Form.Item label="封面">
+            <Form.Item name="type">
+              <Radio.Group>
+                <Radio value={1}>单图</Radio>
+                <Radio value={3}>三图</Radio>
+                <Radio value={0}>无图</Radio>
+              </Radio.Group>
+            </Form.Item>
+            {/* 
+            listType:决定选择文件筐的外观样式
+            showUploadList
+             */}
+            <Upload
+              listType="picture-card"
+              showUploadList
+              action={'http://geek.itheima.net/v1_0/upload'}
+              name='image'
+              onChange={onChange}
+            >
+              <div style={{ marginTop: 8 }}>
+                <PlusOutlined />
+              </div>
+            </Upload>
           </Form.Item>
           <Form.Item
             label="内容"
