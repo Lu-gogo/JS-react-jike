@@ -12,7 +12,8 @@ import {
 import { PlusOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import './index.scss'
-
+import { useState } from 'react'
+import { getChannelAPI } from '@/apis/articles'
 // import ReactQuill from 'react-quill'
 // import 'react-quill/dist/quill.snow.css'
 import React, { useEffect, useRef } from 'react';
@@ -76,6 +77,17 @@ const QuillEditor = ({ value, onChange }) => {
 
 
 const Publish = () => {
+  //获取频道列表
+  const [channelList, setChannelList] = useState([])
+  useEffect(() => {
+    //1.封装函数 在函数体内调用接口
+    const getChannelList = async () => {
+      const res = await getChannelAPI()
+      setChannelList(res.data.channels)
+    }
+    //2.调用函数
+    getChannelList()
+  }, [])
   return (
     <div className="publish">
       <Card
@@ -105,7 +117,8 @@ const Publish = () => {
             rules={[{ required: true, message: '请选择文章频道' }]}
           >
             <Select placeholder="请选择文章频道" style={{ width: 400 }}>
-              <Option value={0}>推荐</Option>
+              {/* value属性会被自动收集起来作为接口的提交字段 */}
+              {channelList.map(item => <Option key={item.id} value={item.id}>{item.name}</Option>)}
             </Select>
           </Form.Item>
           <Form.Item
