@@ -13,11 +13,11 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import './index.scss'
 import { useState } from 'react'
-import { getChannelAPI } from '@/apis/articles'
-// import ReactQuill from 'react-quill'
-// import 'react-quill/dist/quill.snow.css'
-import React, { useEffect, useRef } from 'react';
-import Quill from 'quill';
+import { createArticleAPI, getChannelAPI } from '@/apis/articles'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+import React, { useEffect } from 'react';
+// import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 
 
@@ -28,52 +28,52 @@ const { Option } = Select
 //   theme: 'snow'
 // })
 
-const QuillEditor = ({ value, onChange }) => {
-  const editorRef = useRef(null);
-  const quillRef = useRef(null);
+// const QuillEditor = ({ value, onChange }) => {
+//   const editorRef = useRef(null);
+//   const quillRef = useRef(null);
 
-  useEffect(() => {
-    if (editorRef.current && !quillRef.current) {
-      quillRef.current = new Quill(editorRef.current, {
-        modules: {
-          toolbar: [
-            [{ header: [1, 2, 3, 4, 5, 6, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ list: 'ordered' }, { list: 'bullet' }],
-            [{ script: 'sub' }, { script: 'super' }],
-            [{ indent: '-1' }, { indent: '+1' }],
-            [{ direction: 'rtl' }],
-            [{ color: [] }, { background: [] }],
-            [{ font: [] }],
-            [{ align: [] }],
-            ['link', 'image', 'video'],
-            ['clean']
-          ]
-        },
-        theme: 'snow'
-      });
+//   useEffect(() => {
+//     if (editorRef.current && !quillRef.current) {
+//       quillRef.current = new Quill(editorRef.current, {
+//         modules: {
+//           toolbar: [
+//             [{ header: [1, 2, 3, 4, 5, 6, false] }],
+//             ['bold', 'italic', 'underline', 'strike'],
+//             [{ list: 'ordered' }, { list: 'bullet' }],
+//             [{ script: 'sub' }, { script: 'super' }],
+//             [{ indent: '-1' }, { indent: '+1' }],
+//             [{ direction: 'rtl' }],
+//             [{ color: [] }, { background: [] }],
+//             [{ font: [] }],
+//             [{ align: [] }],
+//             ['link', 'image', 'video'],
+//             ['clean']
+//           ]
+//         },
+//         theme: 'snow'
+//       });
 
-      // 设置初始值
-      if (value) {
-        quillRef.current.root.innerHTML = value;
-      }
+//       // 设置初始值
+//       if (value) {
+//         quillRef.current.root.innerHTML = value;
+//       }
 
-      // 添加内容变化监听
-      quillRef.current.on('text-change', () => {
-        const content = quillRef.current.root.innerHTML;
-        onChange(content);
-      });
-    }
+//       // 添加内容变化监听
+//       quillRef.current.on('text-change', () => {
+//         const content = quillRef.current.root.innerHTML;
+//         onChange(content);
+//       });
+//     }
 
-    return () => {
-      if (quillRef.current) {
-        quillRef.current.off('text-change');
-      }
-    };
-  }, []);
+//     return () => {
+//       if (quillRef.current) {
+//         quillRef.current.off('text-change');
+//       }
+//     };
+//   }, []);
 
-  return <div ref={editorRef} style={{ height: '400px' }} />;
-};
+// return <div ref={editorRef} style={{ height: '400px' }} />;
+// };
 
 
 const Publish = () => {
@@ -88,6 +88,24 @@ const Publish = () => {
     //2.调用函数
     getChannelList()
   }, [])
+
+  //提交表单
+  const onFinish = (formValue) => {
+    // console.log(formValue);
+    const { title, content, channel_id } = formValue
+    //1.按照接口文档处理收集的表单数据
+    const reqData = {
+      title,
+      content,
+      cover: {
+        type: 0,
+        images: []
+      },
+      channel_id
+    }
+    //2.调用接口提交
+    createArticleAPI(reqData)
+  }
   return (
     <div className="publish">
       <Card
@@ -103,6 +121,7 @@ const Publish = () => {
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 16 }}
           initialValues={{ type: 1 }}
+          onFinish={onFinish}
         >
           <Form.Item
             label="标题"
@@ -127,13 +146,13 @@ const Publish = () => {
             rules={[{ required: true, message: '请输入文章内容' }]}
           >
             {/* 富文本组件 */}
-            <QuillEditor />
-            {/* <ReactQuill
+            {/* <QuillEditor /> */}
+            <ReactQuill
               className="publish-quill"
               theme="snow"
               placeholder="请输入文章内容"
-            /> */}
-            {/* <QuillEditor /> */}
+            />
+
 
           </Form.Item>
 
