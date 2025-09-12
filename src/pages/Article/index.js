@@ -93,18 +93,46 @@ const Article = () => {
     }
   ]
 
+
+  //筛选功能
+  //1.准备参数
+  const [reqData, setReqData] = useState({
+    status: '',
+    channel_id: '',
+    begin_pubdate: '',
+    end_pubdate: '',
+    page: 1,
+    per_page: 4
+  })
+
   //获取文章列表
   const [list, setList] = useState([])
   const [count, setCount] = useState(0)
   useEffect(() => {
     async function getList() {
-      const res = await getArticleListAPI()
+      const res = await getArticleListAPI(reqData)
       setList(res.data.results)
       setCount(res.data.total_count)
     }
     getList()
-  }, [])
+  }, [reqData])
 
+  //2.获取当前筛选数据
+  const onFinish = (values) => {
+
+    //3.把表单获取的数据放入参数中
+    setReqData({
+      ...reqData,
+      channel_id: values.channel_id,
+      status: values.status,
+      begin_pubdate: values.date[0].format('YYYY-MM-DD'),
+      end_pubdate: values.date[1].format('YYYY-MM-DD'),
+    })
+    // console.log(reqData);
+    //4.重新获取文章列表 渲染table逻辑
+    //reqData依赖项发生变化时 重新获取文章列表
+
+  }
   return (
     <div>
       <Card
@@ -116,7 +144,7 @@ const Article = () => {
         }
         style={{ marginBottom: 20 }}
       >
-        <Form initialValues={{ status: '' }}>
+        <Form initialValues={{ status: '' }} onFinish={onFinish}>
           <Form.Item label="状态" name="status">
             <Radio.Group>
               <Radio value={''}>全部</Radio>
