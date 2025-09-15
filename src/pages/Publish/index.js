@@ -11,13 +11,12 @@ import {
   message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import './index.scss'
-import { useState } from 'react'
-import { createArticleAPI, getChannelAPI } from '@/apis/articles'
+import { createArticleAPI, getChannelAPI, getArticleById } from '@/apis/articles'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useChannel } from '@/hooks/useChannel'
 // import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
@@ -33,8 +32,8 @@ const Publish = () => {
   //提交表单
   const onFinish = (formValue) => {
     // console.log(formValue);
-    //校验封面类型imageType与实际图片imageList数量匹配
-    if (imageList.length !== imageType) return message.warning('封面图片数量与选择的类型不匹配')
+    //校验封面类型imageType与实际图片ImageList数量匹配
+    if (ImageList.length !== imageType) return message.warning('封面图片数量与选择的类型不匹配')
     const { title, content, channel_id } = formValue
     //1.按照接口文档处理收集的表单数据
     const reqData = {
@@ -42,7 +41,7 @@ const Publish = () => {
       content,
       cover: {
         type: imageType,//封面模式
-        images: imageList.map(item => item.response.data.url)//图片列表
+        images: ImageList.map(item => item.response.data.url)//图片列表
       },
       channel_id
     }
@@ -50,10 +49,10 @@ const Publish = () => {
     createArticleAPI(reqData)
   }
   //上传回调
-  const [imageList, setimageList] = useState([])
+  const [ImageList, setImageList] = useState([])
   const onChange = (value) => {
     // console.log('图片上传', value)
-    setimageList(value.fileList)
+    setImageList(value.fileList)
   }
   //选框切换
   const [imageType, setImageType] = useState(0)
@@ -61,6 +60,34 @@ const Publish = () => {
     // console.log('切换了', value.target.value)
     setImageType(value.target.value)
   }
+
+  //回填数据
+  const [searchParmas] = useSearchParams()
+  const articleId = searchParmas.get('id')
+  // console.log(articleId)
+  //获取实例
+  const [form] = Form.useForm()
+
+  useEffect(() => {
+    //1.通过id获取数据
+    async function getArticleDetail() {
+      const res = await getArticleById(articleId)
+      const data = res.data
+      form.setFieldsValue({
+        ...data,
+        type: data.cover.type
+      })
+      //无法回填封面 set -> {type:3} {cover:{type:3}}
+      // console.log('1', data)
+      setImageType(data.cover.type)
+      //显示图片
+      setImageList(data.cover.images.map(url => {
+        return { url }
+      }))
+    }
+    //2.通过实例方法 完成回填
+    getArticleDetail()
+  }, [articleId, form])
   return (
     <div className="publish">
       <Card
@@ -77,6 +104,7 @@ const Publish = () => {
           wrapperCol={{ span: 16 }}
           initialValues={{ type: 0 }}
           onFinish={onFinish}
+          form={form}
         >
           <Form.Item
             label="标题"
@@ -115,6 +143,7 @@ const Publish = () => {
                 name='image'
                 onChange={onChange}
                 maxCount={imageType}
+                fileList={ImageList}
               >
                 <div style={{ marginTop: 8 }}>
                   <PlusOutlined />
