@@ -86,7 +86,8 @@ const Publish = () => {
       }))
     }
     //2.通过实例方法 完成回填
-    getArticleDetail()
+    //只有有Id才能调用此函数
+    articleId && getArticleDetail()
   }, [articleId, form])
   return (
     <div className="publish">
@@ -94,7 +95,7 @@ const Publish = () => {
         title={
           <Breadcrumb items={[
             { title: <Link to={'/'}>首页</Link> },
-            { title: '发布文章' },
+            { title: `${articleId ? '编辑' : '发布'}文章` },
           ]}
           />
         }
