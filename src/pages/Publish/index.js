@@ -13,7 +13,7 @@ import {
 import { PlusOutlined } from '@ant-design/icons'
 import { Link, useSearchParams } from 'react-router-dom'
 import './index.scss'
-import { createArticleAPI, getChannelAPI, getArticleById } from '@/apis/articles'
+import { createArticleAPI, getChannelAPI, getArticleById, updateArticleAPI } from '@/apis/articles'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import React, { useState, useEffect } from 'react'
@@ -41,12 +41,24 @@ const Publish = () => {
       content,
       cover: {
         type: imageType,//封面模式
-        images: ImageList.map(item => item.response.data.url)//图片列表
+        //这里的url处理逻辑只是在新增时的逻辑
+        //编辑的时候需要处理
+        images: ImageList.map(item => {
+          if (item.response) return item.response.data.url
+          else return item.url
+        })//图片列表
       },
       channel_id
     }
     //2.调用接口提交
-    createArticleAPI(reqData)
+    //处理调用不同的接口 新增 - 新增接口 编辑状态 - 更新接口
+    if (articleId) {
+      //更新接口
+      updateArticleAPI({ ...reqData, id: articleId })
+    }
+    else {
+      createArticleAPI(reqData)
+    }
   }
   //上传回调
   const [ImageList, setImageList] = useState([])
